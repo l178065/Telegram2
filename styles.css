@@ -1,0 +1,32 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.item {
+  text-align: center;
+  margin: 10px;
+}
+
+img {
+  width: 100px;
+  height: auto;
+}
+
+button {
+  background-color: #ffa500;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+button:hover {
+  background-color: #ff4500;
+}

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>商品展示</title>
+    <style>
+      body {
+        background-color: #ffffff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 10px;
+        width: 100%;
+      }
+
+      .product {
+        flex: 0 0 calc(33.33% - 15px);
+        margin: 0 5px;
+        text-align: center;
+        padding: 10px;
+        box-sizing: border-box;
+        background-color: white;
+      }
+
+      .product img {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 3px;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 5px;
+        width: 100%;
+      }
+
+      button {
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px; /* 按钮圆角 */
+        font-size: 14px;
+        height: 30px; /* 加入购物车按钮高度改为30px */
+        width: 100%;
+        margin: 0 1px; /* 调整按钮左右间距 */
+      }
+
+      .join-cart {
+        background-color: #4caf50; /* 加入购物车按钮颜色 */
+      }
+
+      .decrease {
+        background-color: #f44336; /* 减少按钮颜色 */
+        display: none;
+      }
+
+      .increase {
+        background-color: #2196f3; /* 增加按钮颜色 */
+        display: none;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: #f1f1f1;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .cart-button {
+        background-color: #2196f3;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .checkout-button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .cart-items {
+        display: none;
+        padding: 10px;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        flex-direction: column;
+        background-color: white; /* 设置为白色背景 */
+      }
+
+      .cart-footer {
+        display: flex;
+        justify-content: flex-start; /* 左对齐 */
+        margin-top: 10px;
+        flex-wrap: wrap; /* 允许换行 */
+      }
+
+      .green-button {
+        color: white;
+        border: none;
+        border-radius: 5px; /* 设置为5px的圆角 */
+        height: 30px; /* 修改购物车内部按钮高度为30px */
+        width: calc(
+          33.33% - 6px
+        ); /* 修改购物车内部按钮宽度以放下3个按钮并增加宽度 */
+        margin: 3px; /* 按钮间距，缩小左右间距 */
+        display: flex; /* 使用flex布局 */
+        align-items: center; /* 垂直居中对齐 */
+        justify-content: flex-start; /* 左对齐 */
+        position: relative; /* 使价格绝对定位相对于按钮 */
+      }
+
+      .item-info {
+        font-size: 14px; /* 调整字体大小 */
+        color: white; /* 文字颜色 */
+        display: flex; /* 使用flex布局 */
+        flex-direction: row; /* 水平排列 */
+        align-items: center; /* 垂直居中对齐 */
+        height: 100%; /* 使 item-info 占满高度 */
+        justify-content: space-between; /* 左右对齐 */
+        width: 100%; /* 使 item-info 占满宽度 */
+        padding: 0; /* 移除内边距 */
+      }
+
+      .price {
+        font-size: 14px; /* 修改价格字体大小与商品名一致 */
+        margin-left: auto; /* 使价格靠右显示 */
+      }
+
+      .item-image {
+        height: 30px; /* 图片高度与按钮一致 */
+        width: auto; /* 宽度自适应 */
+        margin-right: 10px; /* 右边距 */
+      }
+
+      .item-name {
+        color: white; /* 商品名颜色 */
+        font-size: 14px; /* 修改商品名字体大小为14px */
+        white-space: nowrap; /* 不换行 */
+        overflow: hidden; /* 超出隐藏 */
+        text-overflow: ellipsis; /* 超出部分用省略号表示 */
+        margin-right: auto; /* 向左移动，避免换行 */
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container" id="product-container"></div>
+
+    <div class="cart-items" id="cart-items">
+      <div class="cart-footer" id="cart-footer">
+        <!-- 动态生成购物车内容 -->
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="cart-button" onclick="toggleCartItems()">购物车</button>
+      <button class="checkout-button">结算</button>
+    </div>
+
+    <script>
+      const products = [
+        {
+          name: "黄金套餐",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 195,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "大炮4粒",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 45,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "蓝P4粒",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 40,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "菱形4粒",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 40,
+          quantity: 0,
+          color: "#673AB7",
+        },
+        {
+          name: "甜甜圈4粒",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 38,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "水果糖4粒",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 45,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "蓝精灵4粒",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 40,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "维格拉4粒",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 36,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "希爱力4粒",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 40,
+          quantity: 0,
+          color: "#8BC34A",
+        },
+        {
+          name: "希爱力5mg",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 145,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "希爱力40",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 38,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "普通希爱力",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 43,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "超级希爱力",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 43,
+          quantity: 0,
+          color: "#673AB7",
+        },
+        {
+          name: "金装希爱力",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 45,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "巅峰希爱力",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 45,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "艾力达20",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 90,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "普通艾力达",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 55,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "超级艾力达",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 55,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "巅峰艾力达",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 55,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "必利劲60",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 40,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "超级必利劲",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 42,
+          quantity: 0,
+          color: "#673AB7",
+        },
+        {
+          name: "巅峰必利劲",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 50,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "泡腾片",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 55,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "卡玛白果冻",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 50,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "草莓红果冻",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 65,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "绿P 绿果冻",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 55,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "绿膜口含片",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 65,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "马牌40",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 40,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "马牌100",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 40,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "马牌200",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 40,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "蓝水晶",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 55,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "蓝宝石",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 55,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "红水晶",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 55,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "红宝石",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 55,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "蓝魔",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 43,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "红魔",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 43,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "金水晶",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 55,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "金女郎",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 55,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "粉女郎",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 55,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "亚历山大",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 58,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "银钻",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 60,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "金钻",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 55,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "红钻",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 43,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "绿钻",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 43,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "蓝钻",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 43,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "白钻",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 75,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "紫巨人",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 55,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "巅峰蓝P",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 48,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "巅峰粉色风暴",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 48,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "巅峰粉色佳人",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 48,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "巅峰紫色佳人",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 55,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "巅峰黑色风暴",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 60,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "巅峰蓝色风暴",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 48,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "紫蝌蚪黑蝌蚪",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 48,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "白金蝌维加力",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 48,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "蓝蝌蚪",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 43,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "绿水鬼",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 70,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "粉水鬼",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 75,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "黑水鬼",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 99,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "红水鬼",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 80,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "泰坦K2红6粒",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 70,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "泰坦K2白6粒",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 80,
+          quantity: 0,
+          color: "#2196F3",
+        },
+        {
+          name: "金马胶囊30粒",
+          img: "https://i.111666.best/image/mtJsFEGzSixEY8yzg2Xfo3.png",
+          price: 80,
+          quantity: 0,
+          color: "#FF9800",
+        },
+        {
+          name: "绿宝盒30粒",
+          img: "https://i.111666.best/image/Zni1NFR1vtg45A9f58gZSN.png",
+          price: 85,
+          quantity: 0,
+          color: "#F44336",
+        },
+        {
+          name: "睾酮素30粒",
+          img: "https://i.111666.best/image/S7Eoa0LFHgoc2oRmIPm2HF.png",
+          price: 99,
+          quantity: 0,
+          color: "#3F51B5",
+        },
+        {
+          name: "小蓝瓶15粒",
+          img: "https://i.111666.best/image/y6ctKnZria9Hf2WaV9vmUv.png",
+          price: 135,
+          quantity: 0,
+          color: "#009688",
+        },
+        {
+          name: "小棕瓶15粒",
+          img: "https://i.111666.best/image/jXtVBGvHQwjIwmavSyac3t.png",
+          price: 135,
+          quantity: 0,
+          color: "#4CAF50",
+        },
+        {
+          name: "小金瓶15粒",
+          img: "https://i.111666.best/image/QVO5u8CA7JNMvQMyfqJ3eh.png",
+          price: 135,
+          quantity: 0,
+          color: "#e53935",
+        },
+        {
+          name: "小绿瓶10粒",
+          img: "https://i.111666.best/image/2VMXsy9vnwxB2iJOqzB71d.png",
+          price: 140,
+          quantity: 0,
+          color: "#2196F3",
+        },
+      ];
+
+      const container = document.getElementById("product-container");
+      const cartFooter = document.getElementById("cart-footer");
+
+      products.forEach((product, index) => {
+        const productDiv = document.createElement("div");
+        productDiv.className = "product";
+        productDiv.innerHTML = `
+                <img src="${product.img}" alt="${product.name}">
+                <div class="button-group">
+                    <button id="cart-button-${index}" class="join-cart" onclick="toggleCart(${index})">加入购物车</button>
+                    <button id="decrease-button-${index}" class="decrease" onclick="decreaseQuantity(${index})">减少</button>
+                    <button id="increase-button-${index}" class="increase" onclick="increaseQuantity(${index})">增加</button>
+                </div>
+            `;
+        container.appendChild(productDiv);
+      });
+
+      function toggleCart(index) {
+        const product = products[index];
+        const cartButton = document.getElementById(`cart-button-${index}`);
+        const decreaseButton = document.getElementById(
+          `decrease-button-${index}`
+        );
+        const increaseButton = document.getElementById(
+          `increase-button-${index}`
+        );
+
+        cartButton.style.display = "none";
+        decreaseButton.style.display = "inline-block";
+        increaseButton.style.display = "inline-block";
+
+        product.quantity++;
+        updateCartDisplay();
+      }
+
+      function decreaseQuantity(index) {
+        const product = products[index];
+        const decreaseButton = document.getElementById(
+          `decrease-button-${index}`
+        );
+        const increaseButton = document.getElementById(
+          `increase-button-${index}`
+        );
+
+        if (product.quantity > 0) {
+          product.quantity--;
+          if (product.quantity === 0) {
+            const cartButton = document.getElementById(`cart-button-${index}`);
+            cartButton.style.display = "inline-block";
+            decreaseButton.style.display = "none";
+            increaseButton.style.display = "none";
+          }
+        }
+        updateCartDisplay();
+      }
+
+      function increaseQuantity(index) {
+        const product = products[index];
+        product.quantity++;
+        updateCartDisplay();
+      }
+
+      function updateCartDisplay() {
+        cartFooter.innerHTML = ""; // 清空购物车内容
+        products.forEach((product) => {
+          if (product.quantity > 0) {
+            const cartItem = document.createElement("div");
+            cartItem.className = "green-button";
+            cartItem.style.backgroundColor = product.color; // 使用商品颜色
+            cartItem.innerHTML = `
+                        <img src="${product.img}" class="item-image" alt="${
+              product.name
+            }">
+                        <div class="item-info">
+                            <span class="item-name">${product.name}</span>
+                            <span class="price">￥${
+                              product.price * product.quantity
+                            }</span>
+                        </div>
+                    `;
+            cartFooter.appendChild(cartItem);
+          }
+        });
+      }
+
+      function toggleCartItems() {
+        const cartItemsContainer = document.getElementById("cart-items");
+        cartItemsContainer.style.display =
+          cartItemsContainer.style.display === "flex" ? "none" : "flex";
+        updateCartDisplay(); // 更新购物车显示内容
+      }
+    </script>
+  </body>
+</html>
