@@ -1204,7 +1204,7 @@
         paymentMethod.innerHTML = `<div style="flex-grow: 1; font-weight: bold">支付方式</div>`;
 
         const paymentOptionsContainer = document.createElement("div");
-        paymentOptionsContainer.className = "payment-options-container"; // 添加这个类以便选择器使用
+        paymentOptionsContainer.className = "payment-options-container";
         paymentOptionsContainer.style.display = "flex";
         paymentOptionsContainer.style.justifyContent = "flex-end";
         paymentOptionsContainer.style.gap = "10px";
@@ -1260,45 +1260,8 @@
 
         paymentMethod.appendChild(paymentOptionsContainer);
 
-        // 上传组件
         const uploadBox = document.createElement("div");
         uploadBox.className = "upload-box";
-        uploadBox.style.width = "60px"; // 设置宽度为60
-        uploadBox.style.height = "60px"; // 设置高度为60
-        uploadBox.style.border = "2px dashed #ccc";
-        uploadBox.style.display = "flex";
-        uploadBox.style.flexDirection = "column";
-        uploadBox.style.alignItems = "center";
-        uploadBox.style.justifyContent = "center";
-        uploadBox.style.cursor = "pointer";
-        uploadBox.style.marginTop = "10px"; // 使它在支付方式下方
-        uploadBox.style.marginBottom = "0px"; // 适当的下边距
-        uploadBox.style.fontFamily = "Arial, sans-serif";
-        uploadBox.style.color = "#666";
-
-        const uploadTextTop = document.createElement("div");
-        uploadTextTop.innerText = "点击上传"; // 上方文本
-        uploadTextTop.style.fontSize = "12px"; // 调整文字大小
-        uploadTextTop.style.textAlign = "center"; // 文本居中
-        uploadTextTop.style.marginBottom = "-12px"; // 减少与+号的间距
-
-        const uploadIcon = document.createElement("div");
-        uploadIcon.className = "upload-icon";
-        uploadIcon.style.fontSize = "32px"; // 调整图标大小
-        uploadIcon.style.color = "#bbb";
-        uploadIcon.innerHTML = "+"; // 中间的加号
-        uploadIcon.style.margin = "0px"; // 不设置上下间距
-
-        const uploadTextBottom = document.createElement("div");
-        uploadTextBottom.innerText = "付款截图"; // 下方文本
-        uploadTextBottom.style.fontSize = "12px"; // 调整文字大小
-        uploadTextBottom.style.textAlign = "center"; // 文本居中
-        uploadTextBottom.style.marginTop = "-12px"; // 减少与+号的间距
-
-        uploadBox.appendChild(uploadTextTop); // 添加上方文本
-        uploadBox.appendChild(uploadIcon); // 添加加号
-        uploadBox.appendChild(uploadTextBottom); // 添加下方文本
-
         uploadBox.onclick = function () {
           const fileInput = document.createElement("input");
           fileInput.type = "file";
@@ -1307,7 +1270,6 @@
             const file = event.target.files[0];
             if (file) {
               console.log("上传的文件:", file.name);
-              // 此处可处理文件上传逻辑
             }
           };
           document.body.appendChild(fileInput);
@@ -1315,28 +1277,32 @@
           document.body.removeChild(fileInput);
         };
 
-        // 将上传组件加入支付方式后面
+        const uploadTextTop = document.createElement("div");
+        uploadTextTop.innerText = "点击上传";
+        uploadTextTop.style.fontSize = "12px";
+        uploadTextTop.style.textAlign = "center";
+        uploadTextTop.style.marginBottom = "-12px";
+
+        const uploadIcon = document.createElement("div");
+        uploadIcon.className = "upload-icon";
+        uploadIcon.style.fontSize = "32px";
+        uploadIcon.style.color = "#bbb";
+        uploadIcon.innerHTML = "+";
+
+        const uploadTextBottom = document.createElement("div");
+        uploadTextBottom.innerText = "付款截图";
+        uploadTextBottom.style.fontSize = "12px";
+        uploadTextBottom.style.textAlign = "center";
+        uploadTextBottom.style.marginTop = "-12px";
+
+        uploadBox.appendChild(uploadTextTop);
+        uploadBox.appendChild(uploadIcon);
+        uploadBox.appendChild(uploadTextBottom);
+
         cartContentContainer.appendChild(paymentMethod);
-        cartContentContainer.appendChild(uploadBox); // 确保上传组件在支付方式下方
+        cartContentContainer.appendChild(uploadBox);
 
         cartItemsContainer.appendChild(cartContentContainer);
-
-        const additionalInfoContainer = document.createElement("div");
-        additionalInfoContainer.style.backgroundColor = "#ffffff";
-        additionalInfoContainer.style.borderRadius = "8px";
-        additionalInfoContainer.style.padding = "10px";
-        additionalInfoContainer.style.marginTop = "10px";
-        additionalInfoContainer.style.width = "100%";
-        additionalInfoContainer.style.boxSizing = "border-box";
-        additionalInfoContainer.style.maxWidth = "800px";
-        additionalInfoContainer.style.margin = "0 auto";
-
-        additionalInfoContainer.innerHTML = `
-            <h3 style="margin: 0 0 10px;">附加信息</h3>
-            <p>这里可以显示优惠券信息或推荐产品。</p>
-        `;
-
-        cartItemsContainer.appendChild(additionalInfoContainer);
 
         const totalPrice = Array.from(cartItems.values()).reduce(
           (sum, item) => sum + item.price * item.quantity,
@@ -1373,19 +1339,7 @@
         checkoutButton.innerText = "付款";
 
         checkoutButton.onclick = function () {
-          const selectedPaymentMethod = Array.from(
-            document.querySelectorAll(".payment-options-container span")
-          ).find(
-            (span) =>
-              span.style.border.includes("2px solid black") &&
-              span.textContent.includes("微信")
-          );
-
-          if (selectedPaymentMethod) {
-            showWeChatPaymentPopup(); // 显示微信付款码
-          } else {
-            alert("请选择微信支付方式以使用此功能。");
-          }
+          window.location.href = "https://yypay.yiyinpay.com/cashier/index.html#/hub/3a8260a5335cc3c59967efa3f781985bac510762eee2a2fce787f1ec2fea24c4";
         };
 
         totalDisplay.appendChild(totalText);
@@ -1743,30 +1697,5 @@
         addressInput.classList.add("address");
       });
     </script>
-
-    <style>
-      .upload-box {
-        width: 60px; /* 设置宽度为60 */
-        height: 60px; /* 设置高度为60 */
-        border: 2px dashed #ccc;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        margin: 10px auto; /* 保持居中 */
-        font-family: Arial, sans-serif;
-        color: #666;
-        margin-top: 10px; /* 确保有顶部间距 */
-      }
-      .upload-icon {
-        font-size: 32px; /* 调整图标大小 */
-        color: #bbb;
-      }
-      .upload-text {
-        font-size: 12px; /* 调整文字大小 */
-        text-align: center; /* 文本居中 */
-      }
-    </style>
   </body>
 </html>
